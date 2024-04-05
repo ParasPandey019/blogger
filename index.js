@@ -2,8 +2,11 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userRoutes')
+const blogRoutes = require('./routes/blogRoutes')
 const cookieParser = require('cookie-parser');
 const { checkForCookie } = require('./middlewares/checkUserStatus');
+const Blof = require("./models/blogModel");
+const Blog = require('./models/blogModel');
 
 
 const app = express();
@@ -24,14 +27,18 @@ app.set('views',path.join(__dirname,"/views"));
 app.use(express.urlencoded({ extended: false}));
 app.use(cookieParser());
 app.use(checkForCookie("token"));
+app.use(express.static(path.resolve("./public")));
 
-app.get("/", (req,res)=>{
+app.get("/", async(req,res)=>{
+  const blogs = await Blog.find({});
    return res.render('home',{
-    user: req.user
+    user: req.user,
+    blogs: blogs
    });
 });
 
 app.use("/user", userRoutes);
+app.use("/blog", blogRoutes);
 
 app.listen(PORT, ()=>{
     console.log(`server started at port: ${PORT}`);
